@@ -40,7 +40,6 @@ public class EmployeeController {
      * @param employeeLoginDTO
      * @return
      */
-
     @PostMapping("/login")
     @ApiOperation("员工登录")
     public Result<EmployeeLoginVO> login(@RequestBody EmployeeLoginDTO employeeLoginDTO) {
@@ -77,7 +76,6 @@ public class EmployeeController {
         return Result.success();
     }
 
-
     /**
      * 使用 EmployeeDTO 的原因是:前端传的数据与数据库实体类差异较大
      * 使用前端传递数据格式一样的类进行封装
@@ -93,6 +91,7 @@ public class EmployeeController {
 
     /**
      * 员工分页查询
+     *
      * @param employeePageQueryDTO
      * @return
      */
@@ -103,5 +102,41 @@ public class EmployeeController {
         //json格式有total records属性要用一个对象进行封装到json中
         PageResult pageResult = employeeService.pageQuery(employeePageQueryDTO);
         return Result.success(pageResult);
+    }
+
+    /**
+     * 启用禁用员工
+     *
+     * @param status
+     * @param id
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    @ApiOperation("启用禁用员工账号")
+    public Result enableDisableEmployee(@PathVariable Integer status, Long id) {
+        log.info("启用禁用员工账号{}", status, id);
+        employeeService.enableDisableEmployee(status, id);
+        return Result.success();
+    }
+
+    /**
+     * 根据id查询员工
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    @ApiOperation("根据id查询员工")
+    public Result<Employee> queryById(@PathVariable Long id) {
+        Employee employee = employeeService.queryById(id);
+        return Result.success(employee);
+    }
+
+    @PutMapping
+    @ApiOperation("编辑员工信息")
+    public Result updateEmployee(@RequestBody EmployeeDTO employeeDTO) {
+        log.info("编辑员工信息:{}", employeeDTO);
+        employeeService.updateEmployee(employeeDTO);
+        return Result.success();
     }
 }

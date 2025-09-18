@@ -6,12 +6,14 @@ import com.sky.entity.Employee;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface EmployeeMapper {
 
     /**
      * 根据用户名查询员工
+     *
      * @param username
      * @return
      */
@@ -20,6 +22,7 @@ public interface EmployeeMapper {
 
     /**
      * 添加用户数据
+     *
      * @param employee
      */
     @Insert("insert into employee(name, username, password, phone, sex, id_number, status, create_time, update_time, create_user, update_user)" +
@@ -28,8 +31,24 @@ public interface EmployeeMapper {
 
     /**
      * 根据用户名进行分页查询
+     *
      * @param employeePageQueryDTO
      * @return
      */
     Page<Employee> pageQueryByName(EmployeePageQueryDTO employeePageQueryDTO);
+
+    /**
+     * 根据id进行修改
+     */
+    void updateById(Employee employee);
+
+    /**
+     * 根据id进行查询
+     * @param id
+     * @return
+     */
+    @Select("select * from employee where id=#{id}")
+    Employee selectById(Long id);
+
+
 }
