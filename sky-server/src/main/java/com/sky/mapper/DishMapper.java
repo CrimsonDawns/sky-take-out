@@ -12,11 +12,14 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 @Mapper
 public interface DishMapper {
 
     /**
      * 根据分类id查询菜品数量
+     *
      * @param categoryId
      * @return
      */
@@ -25,6 +28,7 @@ public interface DishMapper {
 
     /**
      * 插入菜品数据
+     *
      * @param dish
      */
     @AutoFill(value = OperationType.INSERT)
@@ -38,4 +42,9 @@ public interface DishMapper {
 
     @Delete("delete from dish where id = #{id}")
     void deleteById(Long id);
+
+    void deleteByIds(List<Long> ids);
+
+    @AutoFill(value = OperationType.UPDATE)
+    void updateDish(Dish dish);
 }
