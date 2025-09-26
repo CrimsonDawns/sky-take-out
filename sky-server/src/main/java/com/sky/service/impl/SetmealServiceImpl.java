@@ -1,0 +1,49 @@
+package com.sky.service.impl;
+
+import com.sky.dto.SetmealDTO;
+import com.sky.entity.Setmeal;
+import com.sky.entity.SetmealDish;
+import com.sky.mapper.SetmealDishMapper;
+import com.sky.mapper.SetmealMapper;
+import com.sky.service.SetmealService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@Slf4j
+public class SetmealServiceImpl implements SetmealService {
+
+    @Autowired
+    private SetmealMapper setmealMapper;
+
+    @Autowired
+    private SetmealDishMapper setmealDishMapper;
+
+
+    @Override
+    @Transactional
+    public void insertSetmeal(SetmealDTO setmealDTO) {
+        Setmeal setmeal = new Setmeal();
+        //进行属性复制
+        BeanUtils.copyProperties(setmealDTO, setmeal);
+
+        List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
+        //向套餐表插入数据
+        setmealMapper.insertSetmeal(setmeal);
+        //获取套餐id
+        Long setmealId = setmeal.getId();
+
+        setmealDishes.forEach(setmealDish -> {
+            setmealDish.setSetmealId(setmealId);
+        });
+
+        //套餐与菜品之间的关系要通过setmealId进行关联
+        //在新增套餐之前套餐id是无法获取的要通过主键回显获得id
+        setmealDishMapper.insertSetmealDish(setmealDishes);
+    }
+}

@@ -48,4 +48,13 @@
         </set>
         where id = #{id}
     </update>
+
+    <select id="selectByCategoryId" resultType="com.sky.entity.Dish">
+        select * from dish
+        <where>
+            <if test="categoryId!=null">category_id = #{categoryId}</if>
+            <if test="status!=null">and status=#{status}</if>
+        </where>
+        order by create_time desc
+    </select>
 </mapper>
