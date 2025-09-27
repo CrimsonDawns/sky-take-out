@@ -100,7 +100,7 @@ public class DishServiceImpl implements DishService {
             }
         }
 
-        //判断菜品是否被菜品关联
+        //判断菜品是否被套餐关联
         List<Long> setMealDishIds = setmealDishMapper.getSetmealIdsByDishId(ids);
         if (setMealDishIds != null && setMealDishIds.size() > 0) {
             throw new DeletionNotAllowedException(MessageConstant.CATEGORY_BE_RELATED_BY_DISH);

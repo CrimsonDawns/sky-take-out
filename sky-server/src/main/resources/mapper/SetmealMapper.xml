@@ -10,6 +10,7 @@
                 #{createUser}, #{updateUser})
     </insert>
 
+
     <select id="selectPage" resultType="com.sky.vo.SetmealVO">
         select s.*,c.name categoryName from setmeal  s
         left join category  c
@@ -21,4 +22,5 @@
         </where>
         order by s.create_time desc
     </select>
+
 </mapper>
