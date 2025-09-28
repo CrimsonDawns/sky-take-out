@@ -10,7 +10,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +19,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/admin/setmeal")
 public class SetmealController {
+
     @Autowired
     private SetmealService setmealService;
 
@@ -67,6 +67,7 @@ public class SetmealController {
 
     /**
      * 根据id查询套餐
+     *
      * @param id
      * @return
      */
@@ -88,6 +89,20 @@ public class SetmealController {
     public Result update(@RequestBody SetmealDTO setmealDTO) {
         log.info("修改套餐{}", setmealDTO);
         setmealService.updateSetmeal(setmealDTO);
+        return Result.success();
+    }
+
+    /**
+     * 启售停售套餐
+     *
+     * @param id
+     * @param status
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    @ApiOperation("套餐起售停售")
+    public Result setStatus(Long id,@PathVariable Integer status) {
+        setmealService.setStatus(id, status);
         return Result.success();
     }
 }
