@@ -38,7 +38,7 @@ public interface OrderMapper {
      * @param time
      * @return
      */
-    @Select("select * from orders status = #{status} and order_time < #{time}")
+    @Select("select * from orders where status = #{status} and order_time < #{time}")
     List<Orders> getTimeoutOrder(Integer status, LocalDateTime time);
 
     /**
@@ -47,6 +47,10 @@ public interface OrderMapper {
      * @param deliveryInProgress
      * @return
      */
-    @Select("select * from orders status = #{status} and order_time < #{time}")
+    @Select("select * from orders where status = #{status} and order_time < #{time}")
     List<Orders> getDeliveringOrder(Integer deliveryInProgress, LocalDateTime time);
+
+    @Select("select sum(amount) from orders where " +
+            "order_time >= #{beginTime} and order_time <= #{endTime} and status = #{status}")
+    Double sumTurnover(LocalDateTime beginTime, LocalDateTime endTime, Integer status);
 }

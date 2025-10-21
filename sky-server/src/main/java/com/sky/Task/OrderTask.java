@@ -54,7 +54,7 @@ public class OrderTask {
         LocalDateTime time = LocalDateTime.now().plusHours(-1);
 
         //查询运送中的订单
-        List<Orders> ordersList = orderMapper.getDeliveringOrder(Orders.DELIVERY_IN_PROGRESS,time);
+        List<Orders> ordersList = orderMapper.getDeliveringOrder(Orders.DELIVERY_IN_PROGRESS, time);
 
         if (ordersList != null || ordersList.size() > 0) {
             //将订单修改为已完成
