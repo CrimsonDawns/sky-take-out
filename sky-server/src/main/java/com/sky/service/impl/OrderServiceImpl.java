@@ -2,9 +2,12 @@ package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.WebSocket.WebSocketServer;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
@@ -12,16 +15,18 @@ import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.*;
+import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -146,7 +151,7 @@ public class OrderServiceImpl implements OrderService {
 
         OrderPaymentVO vo = jsonObject.toJavaObject(OrderPaymentVO.class);
         vo.setPackageStr(jsonObject.getString("package"));
-        
+
 
         return vo;
     }
@@ -179,5 +184,53 @@ public class OrderServiceImpl implements OrderService {
         webSocketServer.sendToAllClient(jsonString);
 
         orderMapper.update(orders);
+    }
+
+    /**
+     * 查询历史订单
+     *
+     * @param page
+     * @param pageSize
+     * @param status
+     * @return
+     */
+    @Override
+    public PageResult getHistoryOrders(int page, int pageSize, Integer status) {
+        //进行分页
+        PageHelper.startPage(page, pageSize);
+
+        /**
+         * 订单每个用户都是不同的，要获取用户id进行查询
+         */
+        OrdersPageQueryDTO ordersPageQueryDTO = new OrdersPageQueryDTO();
+        //获取用户id
+        ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
+        ordersPageQueryDTO.setStatus(status);
+
+        //查询数据库
+        Page<Orders> orders = orderMapper.getPageHistory(ordersPageQueryDTO);
+
+        List<OrderVO> list = new ArrayList<>();
+
+        //查询出订单明细，并封装入OrderVO进行响应
+        if (orders != null || orders.size() > 0) {
+            for (Orders order : orders) {
+                Long orderId = order.getId();
+                //获取用户订单细节
+                List<OrderDetail> orderDetails = orderDetailMapper.selectByOrderId(orderId);
+
+                OrderVO orderVO = new OrderVO();
+                //由于orderVO是继承order的所以要进行对象属性拷贝
+                BeanUtils.copyProperties(order, orderVO);
+                orderVO.setOrderDetailList(orderDetails);
+
+                list.add(orderVO);
+            }
+        }
+
+        //获取数据
+        long total = orders.getTotal();
+
+        return new PageResult(total, list);
     }
 }
