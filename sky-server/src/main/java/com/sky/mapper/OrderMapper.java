@@ -35,7 +35,7 @@ public interface OrderMapper {
     void update(Orders orders);
 
     /**
-     * 查询超市订单
+     * 查询超时订单
      *
      * @param status
      * @param time
@@ -80,4 +80,12 @@ public interface OrderMapper {
      * @return
      */
     Page<Orders> getPageHistory(OrdersPageQueryDTO ordersPageQueryDTO);
+
+    /**
+     * 根据id查询订单
+     * @param id
+     * @return
+     */
+    @Select("select * from orders where id = #{id}")
+    Orders getById(Long id);
 }
