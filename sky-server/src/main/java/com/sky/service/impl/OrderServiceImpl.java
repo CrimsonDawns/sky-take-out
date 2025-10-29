@@ -25,6 +25,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 
 import java.math.BigDecimal;
@@ -320,5 +321,61 @@ public class OrderServiceImpl implements OrderService {
 
 
         shoppingCartMapper.insertBatch(shoppingCarts);
+    }
+
+    /**
+     * 查询订单
+     *
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+        int page = ordersPageQueryDTO.getPage();
+        int pageSize = ordersPageQueryDTO.getPageSize();
+
+        PageHelper.startPage(page, pageSize);
+
+
+        Page<Orders> orders = orderMapper.getPageHistory(ordersPageQueryDTO);
+
+        List<OrderVO> orderVOS = changeOrderVO(orders);
+
+        return new PageResult(orders.getTotal(), orderVOS);
+    }
+
+    private List<OrderVO> changeOrderVO(Page<Orders> orders) {
+        List<OrderVO> orderVOS = new ArrayList<>();
+
+        List<Orders> ordersList = orders.getResult();
+        //判断是否为空
+        if (!CollectionUtils.isEmpty(ordersList)) {
+            for (Orders order : ordersList) {
+                OrderVO orderVO = new OrderVO();
+                //对象属性拷贝
+                BeanUtils.copyProperties(order, orderVO);
+
+                //根据订单id获取详细的菜品数据
+                String orderDishes = changeOrderDish(order);
+
+                // 将订单菜品信息封装到orderVO中，并添加到orderVOList
+                orderVO.setOrderDishes(orderDishes);
+                orderVOS.add(orderVO);
+            }
+        }
+
+        return orderVOS;
+    }
+
+    private String changeOrderDish(Orders order) {
+        List<OrderDetail> orderDetails = orderDetailMapper.selectByOrderId(order.getId());
+
+
+        List<String> collect = orderDetails.stream().map(orderDetail -> {
+            String s = orderDetail.getName() + "*" + orderDetail.getNumber() ;
+            return s;
+        }).collect(Collectors.toList());
+
+        return String.join(";", collect);
     }
 }
