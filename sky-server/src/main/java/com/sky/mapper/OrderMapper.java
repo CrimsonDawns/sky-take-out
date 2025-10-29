@@ -68,6 +68,7 @@ public interface OrderMapper {
 
     /**
      * 统计销量前10
+     *
      * @param beginTime
      * @param endTime
      * @return
@@ -76,6 +77,7 @@ public interface OrderMapper {
 
     /**
      * 根据用户id和状态进行查询
+     *
      * @param ordersPageQueryDTO
      * @return
      */
@@ -83,9 +85,19 @@ public interface OrderMapper {
 
     /**
      * 根据id查询订单
+     *
      * @param id
      * @return
      */
     @Select("select * from orders where id = #{id}")
     Orders getById(Long id);
+
+    /**
+     * 统计订单各状态的数量
+     *
+     * @param status
+     * @return
+     */
+    @Select("select count(id) from orders where status = #{status}")
+    Integer countStatus(Integer status);
 }

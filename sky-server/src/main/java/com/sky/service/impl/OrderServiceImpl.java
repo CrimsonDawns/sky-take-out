@@ -19,6 +19,7 @@ import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import org.springframework.beans.BeanUtils;
@@ -336,9 +337,8 @@ public class OrderServiceImpl implements OrderService {
 
         PageHelper.startPage(page, pageSize);
 
-
         Page<Orders> orders = orderMapper.getPageHistory(ordersPageQueryDTO);
-
+        //由于前端要视图展示需求，需要把对象全都转换成OrderVO
         List<OrderVO> orderVOS = changeOrderVO(orders);
 
         return new PageResult(orders.getTotal(), orderVOS);
@@ -370,12 +370,32 @@ public class OrderServiceImpl implements OrderService {
     private String changeOrderDish(Orders order) {
         List<OrderDetail> orderDetails = orderDetailMapper.selectByOrderId(order.getId());
 
-
+        //将集合中每个订单所有商品名称及数量进行字符串拼接
         List<String> collect = orderDetails.stream().map(orderDetail -> {
-            String s = orderDetail.getName() + "*" + orderDetail.getNumber() ;
+            String s = orderDetail.getName() + "*" + orderDetail.getNumber();
             return s;
         }).collect(Collectors.toList());
-
+        //对集合所有元素拼接到一起
         return String.join(";", collect);
+    }
+
+    /**
+     * 查询订单各状态数目
+     *
+     * @return
+     */
+    @Override
+    public OrderStatisticsVO getOrderStatistics() {
+        OrderStatisticsVO orderStatisticsVO = new OrderStatisticsVO();
+        //查询订单数
+        Integer toBeConfirmed = orderMapper.countStatus(Orders.TO_BE_CONFIRMED);
+        Integer confirmed = orderMapper.countStatus(Orders.CONFIRMED);
+        Integer deliveryInProgress = orderMapper.countStatus(Orders.DELIVERY_IN_PROGRESS);
+        //封装到 orderStatisticsVO
+        orderStatisticsVO.setToBeConfirmed(toBeConfirmed);
+        orderStatisticsVO.setConfirmed(confirmed);
+        orderStatisticsVO.setDeliveryInProgress(deliveryInProgress);
+
+        return orderStatisticsVO;
     }
 }
